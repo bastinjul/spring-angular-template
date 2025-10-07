@@ -27,11 +27,15 @@ services:
       DB_HOST: db
       DB_PORT: 5432
       DB_SCHEMA: template
-      ALLOWED_CORS: "http://localhost:4200;http://localhost:8080;http://localhost:8090"
+      ALLOWED_CORS: "http://localhost:4200;http://localhost:8080;http://localhost:8090;http://template.localhost;http://template-static.localhost"
+      CLIENT_ID: "$CLIENT_ID"
+      CLIENT_SECRET: "$CLIENT_SECRET"
     depends_on:
       liquibase:
         condition: service_completed_successfully
       db:
+        condition: service_healthy
+      keycloak:
         condition: service_healthy
 
   db:
@@ -82,6 +86,61 @@ services:
       context: frontend
     ports:
       - "8090:80"
+
+  postgres-keycloak:
+    container_name: "pattern-postgres-keycloak"
+    image: "postgres:17"
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - ./keycloak/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', "pg_isready", "-U", "keycloak"]
+      interval: 5s
+      retries: 5
+      timeout: 3s
+
+  keycloak:
+    container_name: "pattern-keycloak"
+    image: "quay.io/keycloak/keycloak:26.4.0"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: "kcadm"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "password"
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres-keycloak
+      KC_DB_URL_PORT: 5432
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_PROXY: edge
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+    ports:
+      - "8987:8080"
+      - "8988:9000"
+    depends_on:
+      postgres-keycloak:
+        condition: service_healthy
+    command:
+      - start-dev
+      - --import-realm
+    volumes:
+      - ./keycloak/template-realm.json:/opt/keycloak/data/import/realm-template.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "{ printf 'HEAD /health/ready HTTP/1.0\r\n\r\n' >&0; grep 'HTTP/1.0 200'; } 0<>/dev/tcp/localhost/9000"]
+      interval: 5s
+      retries: 10
+      timeout: 3s
+
+  reverse-proxy:
+    container_name: "pattern-reverse-proxy"
+    image: "local/template/reverse-proxy"
+    ports:
+      - "80:8080"
+    build:
+      context: reverse-proxy
 
 volumes:
   node_modules_cache:

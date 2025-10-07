@@ -69,7 +69,10 @@
               "buildTarget": "angular-template:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "allowedHosts": ["localhost", "template.localhost", "frontend"]
+          }
         },
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"

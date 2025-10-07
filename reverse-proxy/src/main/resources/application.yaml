@@ -1,0 +1,33 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: backend-api
+              uri: http://backend:8080
+              predicates:
+                - Host=template.localhost,template-static.localhost
+                - Path=/api/v1/**,/oauth2/**,/login/**,/logout
+            - id: backend-actuator
+              uri: http://backend:8081
+              predicates:
+                - Host=template.localhost,template-static.localhost
+                - Path=/actuator,/actuator/**
+            - id: keycloak
+              uri: http://keycloak:8080
+              predicates:
+                - Host=template.localhost,template-static.localhost
+                - Path=/realms/**
+
+            # should be the last, since it matches everything
+            - id: frontend-nginx
+              uri: http://frontend-nginx
+              predicates:
+                - Host=template-static.localhost
+                - Path=/**
+            - id: frontend
+              uri: http://frontend:4200
+              predicates:
+                - Host=template.localhost
+                - Path=/**
