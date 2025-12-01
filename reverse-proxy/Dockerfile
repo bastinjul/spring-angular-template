@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine-musl:21
+FROM bellsoft/liberica-openjre-alpine-musl:25.0.1
 LABEL authors="Julien Bastin"
 
 WORKDIR /app

@@ -1,7 +1,7 @@
 package be.julienbastin.template.services.api;
 
 import be.julienbastin.template.exception.GreetingMessageNotFoundException;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public interface HelloService {
 

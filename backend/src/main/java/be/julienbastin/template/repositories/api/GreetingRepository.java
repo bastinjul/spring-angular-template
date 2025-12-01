@@ -1,7 +1,7 @@
 package be.julienbastin.template.repositories.api;
 
 import be.julienbastin.template.models.Greeting;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 

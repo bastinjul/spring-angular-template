@@ -1,5 +1,5 @@
 {
   "environment": "LOCAL",
-  "backendUri": "http://localhost:8080",
+  "backendUri": "http://template.localhost",
   "backendBasePath": "/api/v1"
 }
